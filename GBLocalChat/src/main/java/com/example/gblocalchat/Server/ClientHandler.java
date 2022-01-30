@@ -6,6 +6,12 @@ import java.io.IOException;
 import java.net.Socket;
 
 public class ClientHandler {
+    //констарнты сделанные мной...но почему то с ними не работали личные сообщение
+    //private static final String COMMAND_PREFIX = "/";
+    //private static final String END = COMMAND_PREFIX + "end";
+    // private static final String PRIVATE_MESSAGE = COMMAND_PREFIX + "w";
+    // private static final String AUTH = COMMAND_PREFIX + "auth";
+
     private final Socket socket;
     private final ChatServer chatServer;
     private final DataInputStream in;
@@ -65,10 +71,19 @@ public class ClientHandler {
         try {
             while (true) {
                 final String message = in.readUTF();
-                if("/end".equals(message)){
-                    break;
+                if (message.startsWith("/")) {
+                    if (message.equals("/end")) {
+                        break;
+                    }
+                    if (message.startsWith("/w")) {
+                        final String[] split = message.split(" ");
+                        final String nickTo = split[1];
+                        chatServer.sendMessageToClient(this, nickTo, message.substring("/w".length() + 2
+                                + nickTo.length()));
+                    }
+                    continue;
                 }
-                chatServer.broadcast(message);
+                chatServer.broadcast(nick + " " + message);
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -93,12 +108,6 @@ public class ClientHandler {
                             sendMessage("Пользователь уже авторизован");
                             continue;
                         }
-                        //Пытался реализовать проверку вводимых логина и пароля...у меня уже мозг болит.
-                        //с самого утра сижу, но что то толковое никак не выходит...мне не хватает опыта...
-                        //if (!login.startsWith("login") && !password.startsWith("password")) {
-                        //   chatServer.broadcast("траляля");
-                        //  continue;
-                        //}
                         sendMessage("/authok " + nick);
                         this.nick = nick;
                         chatServer.broadcast("Пользователь " + nick + " зашел в чат");

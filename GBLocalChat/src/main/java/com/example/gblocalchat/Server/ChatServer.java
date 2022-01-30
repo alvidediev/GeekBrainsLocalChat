@@ -52,4 +52,14 @@ public class ChatServer {
             client.sendMessage(message);
         }
     }
+
+    public void sendMessageToClient(ClientHandler from, String nickTo, String message){
+        final ClientHandler clientTo = clients.get(nickTo);
+        if(clientTo != null) {
+            clientTo.sendMessage("От " + from.getNick() + ": " + message);
+            from.sendMessage("Участнику " + nickTo + ": " + message);
+            return;
+        }
+        from.sendMessage("Участника с ником " + nickTo + " нет в чате");
+    }
 }
