@@ -1,11 +1,17 @@
 package com.example.gblocalchat.Client;
 
+import com.example.gblocalchat.Command;
 import com.example.gblocalchat.HelloController;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+import static com.example.gblocalchat.Command.*;
 
 public class ChatClient {
     private Socket socket;
@@ -30,23 +36,32 @@ public class ChatClient {
                 try {
                     while (true) {
                         final String authMsg = in.readUTF();
-                        if(authMsg.startsWith("/authok")){
+                        if (getCommandByText(authMsg) == AUTHOK) {
                             final String nick = authMsg.split(" ")[1];
                             controller.addMessage("Успешная авторизация под ником " + nick);
+                            controller.setAuth(true);
                             break;
                         }
                     }
 
-                    while (true){
+                    while (true) {
                         final String message = in.readUTF();
-                        if("/end".equals(message)){
-
+                        if (Command.isCommand(message)) {
+                            if (getCommandByText(message) == END) {
+                                controller.setAuth(false);
+                                break;
+                            }
+                            if (getCommandByText(message) == CLIENTS) {
+                                final String[] clients = message.replace(CLIENTS.getCommand() + " ", "")
+                                        .split(" ");
+                                controller.updateClientList(clients);
+                            }
                         }
                         controller.addMessage(message);
                     }
                 } catch (IOException e) {
                     e.printStackTrace();
-                }finally {
+                } finally {
                     closeConnection();
                 }
             }).start();
