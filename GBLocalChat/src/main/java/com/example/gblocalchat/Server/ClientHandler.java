@@ -1,17 +1,15 @@
 package com.example.gblocalchat.Server;
 
+import com.example.gblocalchat.Command;
+
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
 
-public class ClientHandler {
-    //констарнты сделанные мной...но почему то с ними не работали личные сообщение
-    //private static final String COMMAND_PREFIX = "/";
-    //private static final String END = COMMAND_PREFIX + "end";
-    // private static final String PRIVATE_MESSAGE = COMMAND_PREFIX + "w";
-    // private static final String AUTH = COMMAND_PREFIX + "auth";
+import static com.example.gblocalchat.Command.*;
 
+public class ClientHandler {
     private final Socket socket;
     private final ChatServer chatServer;
     private final DataInputStream in;
@@ -71,11 +69,11 @@ public class ClientHandler {
         try {
             while (true) {
                 final String message = in.readUTF();
-                if (message.startsWith("/")) {
-                    if (message.equals("/end")) {
+                if (Command.isCommand(message)) {
+                    if (getCommandByText(message) == END) {
                         break;
                     }
-                    if (message.startsWith("/w")) {
+                    if (getCommandByText(message) == PRIVATE_MESSAGE) {
                         final String[] split = message.split(" ");
                         final String nickTo = split[1];
                         chatServer.sendMessageToClient(this, nickTo, message.substring("/w".length() + 2
@@ -83,7 +81,7 @@ public class ClientHandler {
                     }
                     continue;
                 }
-                chatServer.broadcast(nick + " " + message);
+                chatServer.broadcast(nick + ": " + message);
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -91,13 +89,11 @@ public class ClientHandler {
     }
 
 
-
-    //Не забыть добавить функционал проверки входящих данных
     private void authenticate() {
         while (true) {
             try {
                 final String message = in.readUTF();
-                if (message.startsWith("/auth")) {
+                if (getCommandByText(message) == AUTH) {
                     final String[] split = message.split(" ");
                     final String login = split[1];
                     final String password = split[2];
@@ -108,7 +104,8 @@ public class ClientHandler {
                             sendMessage("Пользователь уже авторизован");
                             continue;
                         }
-                        sendMessage("/authok " + nick);
+                        //если будет ошибка, то проверить строку 109. У енама Сергея нету пробела, а тут есть
+                        sendMessage(AUTHOK, nick);
                         this.nick = nick;
                         chatServer.broadcast("Пользователь " + nick + " зашел в чат");
                         chatServer.subscribe(this);
@@ -123,17 +120,22 @@ public class ClientHandler {
         }
     }
 
-    public void sendMessage(String msg) {
+    public void sendMessage(Command command, String msg) {
         try {
-            if(msg.startsWith("/authok")) {
-                out.writeUTF(msg);
-            } else {
-                out.writeUTF(getNick() + ": " + msg);
-            }
+            out.writeUTF(command.getCommand() + " " + msg);
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
+
+    public void sendMessage(String msg) {
+        try {
+            out.writeUTF(getNick() + ": " + msg);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
 
     public String getNick() {
         return nick == null ? "" : nick;

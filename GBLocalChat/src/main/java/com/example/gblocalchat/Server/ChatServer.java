@@ -1,10 +1,13 @@
 package com.example.gblocalchat.Server;
 
+import com.example.gblocalchat.Command;
+
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class ChatServer {
 
@@ -41,10 +44,12 @@ public class ChatServer {
 
     public void subscribe(ClientHandler client) {
         clients.put(client.getNick(), client);
+        broadcastClientList();
     }
 
     public void unSubscribe(ClientHandler client) {
         clients.remove(client.getNick());
+        broadcastClientList();
     }
 
     public void broadcast(String message) {
@@ -61,5 +66,18 @@ public class ChatServer {
             return;
         }
         from.sendMessage("Участника с ником " + nickTo + " нет в чате");
+    }
+
+    public void broadcastClientList(){
+        final String message = clients.values().stream()
+                .map(ClientHandler::getNick)
+                .collect(Collectors.joining(" "));
+        broadcast(Command.CLIENTS, message);
+    }
+
+    private void broadcast(Command command, String message) {
+        for (ClientHandler client : clients.values()) {
+            client.sendMessage(command, message);
+        }
     }
 }
