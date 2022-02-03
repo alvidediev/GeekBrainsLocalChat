@@ -16,18 +16,34 @@ public class ClientHandler {
     private final DataOutputStream out;
 
     private String nick;
+    private boolean connect;
 
     public ClientHandler(Socket socket, ChatServer chatServer) {
         try {
             this.nick = "";
+            connect = false;
             this.socket = socket;
             this.chatServer = chatServer;
             in = new DataInputStream(socket.getInputStream());
             out = new DataOutputStream(socket.getOutputStream());
+
+            new Thread(() -> {
+                try {
+                    Thread.sleep(5000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                if (!connect) {
+                    closeConnection();
+                }
+            }).start();
+
             new Thread(() -> {
                 try {
                     authenticate();
-                    readMessage();
+                    if (connect) {
+                        readMessage();
+                    }
                 } finally {
                     closeConnection();
                 }
@@ -97,18 +113,17 @@ public class ClientHandler {
                     final String[] split = message.split(" ");
                     final String login = split[1];
                     final String password = split[2];
-
                     final String nick = chatServer.getAuthService().getNickByLoginAndPassword(login, password);
                     if (nick != null) {
                         if (chatServer.isNickBusy(nick)) {
                             sendMessage("Пользователь уже авторизован");
                             continue;
                         }
-                        //если будет ошибка, то проверить строку 109. У енама Сергея нету пробела, а тут есть
                         sendMessage(AUTHOK, nick);
                         this.nick = nick;
                         chatServer.broadcast("Пользователь " + nick + " зашел в чат");
                         chatServer.subscribe(this);
+                        connect = true;
                         break;
                     } else {
                         sendMessage("Неверный логин или пароль");
