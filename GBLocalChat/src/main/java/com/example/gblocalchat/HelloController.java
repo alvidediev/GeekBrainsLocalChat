@@ -8,8 +8,6 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 
-import java.util.List;
-
 public class HelloController {
     @FXML
     private VBox registerBox;
@@ -36,7 +34,7 @@ public class HelloController {
 
     final ChatClient chatClient;
 
-    JdbcApp jdbcApp = new JdbcApp();
+    JdbcBaseHandler base = new JdbcBaseHandler();
 
     public HelloController() {
         chatClient = new ChatClient(this);
@@ -100,6 +98,11 @@ public class HelloController {
     }
 
     public void btnRegisterNewAccount(ActionEvent actionEvent) {
-            jdbcApp.insert(registerLoginField.getText(), registerPasswordField.getText(), registerNickField.getText());
+        try {
+            base.connect();
+            base.insert(registerLoginField.getText(), registerPasswordField.getText(), registerNickField.getText());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }

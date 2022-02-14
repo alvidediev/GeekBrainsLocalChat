@@ -6,6 +6,7 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
+import java.sql.SQLException;
 
 import static com.example.gblocalchat.Command.*;
 
@@ -113,7 +114,7 @@ public class ClientHandler {
                     final String[] split = message.split(" ");
                     final String login = split[1];
                     final String password = split[2];
-                    final String nick = chatServer.getAuthService().getNickByLoginAndPassword(login, password);
+                    final String nick = chatServer.getAuthService().getNickByLoginAndPassword(login,password);
                     if (nick != null) {
                         if (chatServer.isNickBusy(nick)) {
                             sendMessage("Пользователь уже авторизован");
@@ -129,7 +130,7 @@ public class ClientHandler {
                         sendMessage("Неверный логин или пароль");
                     }
                 }
-            } catch (IOException e) {
+            } catch (IOException | SQLException e) {
                 e.printStackTrace();
             }
         }
