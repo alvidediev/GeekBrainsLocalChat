@@ -22,30 +22,4 @@ public class InMemoryAuthService implements AuthService {
     public String getNickByLoginAndPassword(String login, String password) throws SQLException {
         return base.select(login,password);
     }
-
-//    private static class UserData{
-//        private final String login;
-//        private final String password;
-//        private final String nick;
-//
-//        public String getLogin() {
-//            return login;
-//        }
-//
-//        public String getPassword() {
-//            return password;
-//        }
-//
-//        public String getNick() {
-//            return nick;
-//        }
-//
-//        public UserData(String login, String password, String nick) {
-//            this.login = login;
-//            this.password = password;
-//            this.nick = nick;
-//
-//
-//        }
-//    }
 }
