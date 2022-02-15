@@ -89,10 +89,6 @@ public class HelloController {
         setRegisterWindowVisible(true);
     }
 
-    public void btnLoginClick(ActionEvent actionEvent) {
-
-    }
-
     public void btnLoginWindowClick(ActionEvent actionEvent) {
         setRegisterWindowVisible(false);
     }

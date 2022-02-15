@@ -37,11 +37,13 @@ public class JdbcBaseHandler {
     }
 
     public void createTable() throws SQLException {
-        statement.executeUpdate("CREATE TABLE IF NOT EXISTS clients (" +
-                "id INTEGER PRIMARY KEY AUTOINCREMENT," +
-                "login TEXT UNIQUE," +
-                "password TEXT," +
-                "nick TEXT" + ");");
+        statement.executeUpdate(
+                "" + "CREATE TABLE IF NOT EXISTS clients (" +
+                        "id INTEGER PRIMARY KEY AUTOINCREMENT," +
+                        "login TEXT UNIQUE," +
+                        "password TEXT," +
+                        "nick TEXT" + ");"
+        );
     }
 
 
@@ -53,7 +55,6 @@ public class JdbcBaseHandler {
             ps.setString(2, password);
             ps.setString(3, nick);
             ps.executeUpdate();
-
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -65,8 +66,11 @@ public class JdbcBaseHandler {
         )) {
             ps.setString(1, login);
             ps.setString(2, password);
-            ResultSet resultSet = ps.executeQuery();
-            return resultSet.getString(1);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return rs.getString(1);
+            }
+            return null;
         }
     }
 
@@ -74,19 +78,17 @@ public class JdbcBaseHandler {
      * В нашем окне не хватает уже места для для поле смены ника.
      * Описание метода и моей логики.
      * Поля:
-     * @param login - запись в базе данных (ник) который будет обновлен (изменен).
-     * @param password - ключ, по которому будет производится поиск записи.
-     * @param nick - ключ, по которому будет производится поиск записи.
-     * Логика : По плану должно было быть окошко изменения ника в котором были бы собственно сами поля ввода (TextField)
+     * @param login    - запись в базе данных (ник) который будет обновлен (изменен).
+     * @param nick     - ключ, по которому будет производиться поиск записи.
+     * Логика: По плану должно было быть окошко изменения ника в котором были бы собственно сами поля ввода (TextField)
      * кнопка смены ника и кнопка возврата на главное меню.
      */
-    public void changeNick(String login, String password, String nick) {
+    public void changeNick(String nick, String login) {
         try (PreparedStatement ps = connection.prepareStatement(
-                "UPDATE clients SET nick = ? WHERE login = ? AND password = ?"
+                "UPDATE clients SET nick = ? WHERE login = ?"
         )) {
-            ps.setString(1, login);
-            ps.setString(2, password);
-            ps.setString(3, nick);
+            ps.setString(1, nick);
+            ps.setString(2, login);
             ps.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();

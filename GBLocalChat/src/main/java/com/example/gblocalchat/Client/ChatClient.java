@@ -2,11 +2,13 @@ package com.example.gblocalchat.Client;
 
 import com.example.gblocalchat.Command;
 import com.example.gblocalchat.HelloController;
+import com.example.gblocalchat.JdbcBaseHandler;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -18,6 +20,7 @@ public class ChatClient {
     private DataInputStream in;
     private DataOutputStream out;
     private HelloController controller;
+    JdbcBaseHandler base = new JdbcBaseHandler();
 
     private final String LOCAL_HOST = "localhost";
     private final int PORT = 8189;
@@ -46,7 +49,7 @@ public class ChatClient {
 
                     while (true) {
                         final String message = in.readUTF();
-                        if (Command.isCommand(message)) {
+                        if (isCommand(message)) {
                             if (getCommandByText(message) == END) {
                                 controller.setAuth(false);
                                 break;
@@ -56,10 +59,17 @@ public class ChatClient {
                                         .split(" ");
                                 controller.updateClientList(clients);
                             }
+                            if(getCommandByText(message) == CHANGE_NICK){
+                                base.connect();
+                                final String[] split = message.replace(CHANGE_NICK.getCommand() + " ", "").split(" ");
+                                final String nick = split[1];
+                                final String login = split[2];
+                                base.changeNick(nick,login);
+                            }
                         }
                         controller.addMessage(message);
                     }
-                } catch (IOException e) {
+                } catch (IOException | SQLException e) {
                     e.printStackTrace();
                 } finally {
                     closeConnection();
