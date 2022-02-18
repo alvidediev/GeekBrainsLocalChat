@@ -7,17 +7,17 @@ public enum Command {
     AUTH("/auth"),
     PRIVATE_MESSAGE("/w"),
     END("/end"),
-    CLIENTS("/clients");
+    CLIENTS("/clients"),
+    CHANGE_NICK("/chn");
 
 
     private String command;
 
     Command(String command) {
-
         this.command = command;
     }
 
-    public static Command getCommandByText(String text){
+    public static Command getCommandByText(String text) {
         return Arrays.stream(values())
                 .filter(cmd -> text.startsWith(cmd.getCommand()))
                 .findAny().orElseThrow(() -> new RuntimeException("Несуществующая команда"));
@@ -31,7 +31,7 @@ public enum Command {
         return command;
     }
 
-    public static String getCommandByPrefix(){
+    public static String getCommandByPrefix() {
         return "/";
     }
 }

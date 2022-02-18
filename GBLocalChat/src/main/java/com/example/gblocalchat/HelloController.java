@@ -6,10 +6,17 @@ import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
-
-import java.util.List;
+import javafx.scene.layout.VBox;
 
 public class HelloController {
+    @FXML
+    private VBox registerBox;
+    @FXML
+    private TextField registerLoginField;
+    @FXML
+    private TextField registerPasswordField;
+    @FXML
+    private TextField registerNickField;
     @FXML
     private HBox loginBox;
     @FXML
@@ -26,6 +33,8 @@ public class HelloController {
     private TextArea messageArea;
 
     final ChatClient chatClient;
+
+    JdbcBaseHandler base = new JdbcBaseHandler();
 
     public HelloController() {
         chatClient = new ChatClient(this);
@@ -65,9 +74,31 @@ public class HelloController {
         messagebox.setVisible(isAuthSucces);
     }
 
+    public void setRegisterWindowVisible(boolean isAuthSucces) {
+        loginBox.setVisible(!isAuthSucces);
+        registerBox.setVisible(isAuthSucces);
+    }
+
     public void updateClientList(String[] clients) {
         clientlist.getItems().clear();
         clientlist.getItems().addAll(clients);
 
+    }
+
+    public void btnRegisterClick(ActionEvent actionEvent) {
+        setRegisterWindowVisible(true);
+    }
+
+    public void btnLoginWindowClick(ActionEvent actionEvent) {
+        setRegisterWindowVisible(false);
+    }
+
+    public void btnRegisterNewAccount(ActionEvent actionEvent) {
+        try {
+            base.connect();
+            base.insert(registerLoginField.getText(), registerPasswordField.getText(), registerNickField.getText());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }
