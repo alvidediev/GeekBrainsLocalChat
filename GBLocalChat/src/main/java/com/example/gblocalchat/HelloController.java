@@ -8,6 +8,12 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 
+import java.io.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+
 public class HelloController {
     @FXML
     private VBox registerBox;
@@ -33,6 +39,9 @@ public class HelloController {
     private TextArea messageArea;
 
     final ChatClient chatClient;
+
+    File history = new File("historyOfChat.txt");
+
 
     JdbcBaseHandler base = new JdbcBaseHandler();
 
@@ -100,5 +109,44 @@ public class HelloController {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    /**
+     * Если файла нет, то создаем его. И, как вы показывали по паттерну "Декоратор" создаем PrintWriter,
+     * а потом создаем буферизированный поток куда передаем наш PrintWriter. Берем текст из messageArea и заносим
+     * текст в файл.
+     */
+    public void saveHistory(){
+        try {
+            if (!history.exists()) {
+                System.out.println("не существует.\n Создаю файл...");
+                history.createNewFile();
+            }
+            PrintWriter writer = new PrintWriter(new FileWriter(history, false));
+            BufferedWriter bufWriter = new BufferedWriter(writer);
+            bufWriter.write(messageArea.getText());
+            bufWriter.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * Нужно подумать над тем, как именно последние 100 строк показывать...но это не первая проблема, я вообще не
+     * уверен, что тут сделано все правильно, да и вообще кажется, что я придумал новый паттерн
+     * "Китайский завод велосипедов".
+     */
+    public void loadHistory(){
+        try {
+            List<String> historyList;
+            FileInputStream in = new FileInputStream(history);
+            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(in));
+            //Опять идея оказалась умнее меня и мой индусский код заменила на одну строчку...
+            historyList = bufferedReader.lines().collect(Collectors.toList());
+            IntStream.range(2, historyList.size()).forEach(i -> messageArea.appendText(historyList.get(i) + "\n"));
+        }catch (IOException e){
+            e.printStackTrace();
+        }
+
     }
 }
