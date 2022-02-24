@@ -43,6 +43,7 @@ public class ChatClient {
                             final String nick = authMsg.split(" ")[1];
                             controller.addMessage("Успешная авторизация под ником " + nick);
                             controller.setAuth(true);
+                            controller.loadHistory();
                             break;
                         }
                     }
@@ -68,6 +69,7 @@ public class ChatClient {
                             }
                         }
                         controller.addMessage(message);
+                        controller.saveHistory();
                     }
                 } catch (IOException | SQLException e) {
                     e.printStackTrace();
