@@ -6,6 +6,8 @@ import com.example.gblocalchat.HelloController;
 import java.io.*;
 import java.net.Socket;
 import java.sql.SQLException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import static com.example.gblocalchat.Command.*;
 
@@ -14,6 +16,7 @@ public class ClientHandler {
     private final ChatServer chatServer;
     private final DataInputStream in;
     private final DataOutputStream out;
+    private final ExecutorService exec;
 
     private String nick;
     private boolean connect;
@@ -26,8 +29,9 @@ public class ClientHandler {
             this.chatServer = chatServer;
             in = new DataInputStream(socket.getInputStream());
             out = new DataOutputStream(socket.getOutputStream());
+            exec = Executors.newFixedThreadPool(10);
 
-            new Thread(() -> {
+            exec.execute(() -> {
                 try {
                     Thread.sleep(120_000);
                 } catch (InterruptedException e) {
@@ -36,9 +40,9 @@ public class ClientHandler {
                 if (!connect) {
                     closeConnection();
                 }
-            }).start();
+            });
 
-            new Thread(() -> {
+            exec.execute(() -> {
                 try {
                     authenticate();
                     if (connect) {
@@ -47,7 +51,7 @@ public class ClientHandler {
                 } finally {
                     closeConnection();
                 }
-            }).start();
+            });
 
         } catch (IOException e) {
             throw new RuntimeException(e);
