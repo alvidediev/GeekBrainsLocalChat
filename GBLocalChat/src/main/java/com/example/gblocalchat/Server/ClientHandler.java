@@ -12,6 +12,8 @@ import java.util.concurrent.Executors;
 import static com.example.gblocalchat.Command.*;
 
 public class ClientHandler {
+
+    static final int THREAD_SLEEP_MILLIS = 120_000;
     private final Socket socket;
     private final ChatServer chatServer;
     private final DataInputStream in;
@@ -33,11 +35,13 @@ public class ClientHandler {
 
             exec.execute(() -> {
                 try {
-                    Thread.sleep(120_000);
+                    ChatServer.LOGGER.info("Запуск потока ожидающего - {},  пока пользователь не введет данные ", THREAD_SLEEP_MILLIS);
+                    Thread.sleep(THREAD_SLEEP_MILLIS);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
                 if (!connect) {
+                    ChatServer.LOGGER.warn("Поток отработал и осуществил закрытие соккета!");
                     closeConnection();
                 }
             });

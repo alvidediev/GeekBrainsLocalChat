@@ -1,20 +1,22 @@
 package com.example.gblocalchat.Server;
 
 import com.example.gblocalchat.Command;
-import com.example.gblocalchat.HelloController;
 
-import java.io.*;
+import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class ChatServer {
 
     private static final int PORT = 8189;
     private final AuthService authService;
     private final Map<String, ClientHandler> clients;
+    public static final Logger LOGGER = LogManager.getLogger(ChatServer.class);
 
     public ChatServer() {
         clients = new HashMap<>();
@@ -24,11 +26,11 @@ public class ChatServer {
 
     public void start() {
         try (ServerSocket serverSocket = new ServerSocket(PORT)) {
+            LOGGER.info("Сервер запущен!");
             while (true) {
-                System.out.println("Ждем подключения клиента");
                 final Socket socket = serverSocket.accept();
                 new ClientHandler(socket, this);
-                System.out.println("Клиент подключился");
+                LOGGER.info("Клиент успешно подключился!");
             }
         } catch (IOException e) {
             e.printStackTrace();

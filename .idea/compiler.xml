@@ -11,6 +11,12 @@
     </annotationProcessing>
     <bytecodeTargetLevel>
       <module name="GBLocalChat" target="11" />
+      <module name="Test" target="1.5" />
     </bytecodeTargetLevel>
+  </component>
+  <component name="JavacSettings">
+    <option name="ADDITIONAL_OPTIONS_OVERRIDE">
+      <module name="GBLocalChat" options="" />
+    </option>
   </component>
 </project>
