@@ -1,4 +1,4 @@
-package com.example.gblocalchat.FirstTaskFrom4HW;
+package com.example.gblocalchat.LVL3Lesson4.FirstTaskFrom4HW;
 
 public class WaitAndNotify {
 
